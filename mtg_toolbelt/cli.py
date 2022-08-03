@@ -68,7 +68,8 @@ def meta(sideboard: bool = False, total_count: bool = False, top: int = 25):
     # Print results
     print(f"{standings_dict['format'].upper()} METAGAME")
     print(f"- {standings_dict['start_date']} - {standings_dict['end_date']}")
-    print(f"- {board} only, {rank.replace('_', ' ')}")
+    print(f"- {board} only, {rank.replace('_', ' ')}\n")
+    print('Rank', 'Count', 'Card')
     i = 1
     for card, freq in card_rank.items():
         if i == top + 1:
