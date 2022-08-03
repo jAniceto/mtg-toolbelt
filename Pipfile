@@ -12,6 +12,7 @@ typer = "*"
 beautifulsoup4 = "*"
 
 [dev-packages]
+mtg-toolbelt = {editable = true, path = "."}
 
 [requires]
 python_version = "3.9"
