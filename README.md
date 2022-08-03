@@ -12,12 +12,36 @@ $ pipenv install
 
 ## Usage
 ```
-$ python mtgo_toolbelt [command]
+$ mtg-tools --help
 ```
 
-Main commands:
+```
+Usage: mtg-tools [OPTIONS] COMMAND [ARGS]...
 
-- `db_update` - create or update card DB.
+Commands:
+  db-update  Create or update card database from Scryfall.
+  meta       Get metagame data on card frequencies.
+  standings  Scrape decklists from MTGO standings provided by...
+```
+
+For each command:
+
+```
+$ mtg-tools meta --help
+```
+
+```
+Usage: mtg-tools meta [OPTIONS]
+
+  Get metagame data on card frequencies.
+
+Options:
+  --sideboard / --no-sideboard    [default: no-sideboard]
+  --total-count / --no-total-count
+                                  [default: no-total-count]
+  --top INTEGER                   [default: 25]
+  --help                          Show this message and exit.
+```
 
 
 ## Configuration
