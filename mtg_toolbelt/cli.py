@@ -1,7 +1,9 @@
+import json
 import typer
 from pathlib import Path
-from mtg_toolbelt.utils import load_config
+from mtg_toolbelt.utils import load_config, setup_dir
 from mtg_toolbelt.database import cards
+from mtg_toolbelt.metagame import mtgo_standings, metagame
 
 
 config = load_config()
@@ -23,8 +25,57 @@ def test():
 @app.command()
 def db_update():
     """Create or update card database from Scryfall."""
-    db_dir = Path(data_files_path) / 'db'
-    cards.update_db(scryfall_db_url, db_dir)
+    db_path = Path(data_files_path) / 'db'
+    cards.update_db(scryfall_db_url, db_path)
+
+
+@app.command()
+def standings(start_date: str, end_date: str, format_: str, show: bool = False):
+    """Scrape decklists from MTGO standings provided by magic.wizards.com."""
+    metagame_path = Path(data_files_path) / 'metagame'
+    setup_dir(metagame_path)
+
+    decks = mtgo_standings.scrape_decklists(start_date, end_date, format_, metagame_path)
+
+    # Display deck lists in terminal
+    if show:
+        for deck in decks:
+            deck.print()
+            input("Press Enter see next deck...")
+
+
+@app.command()
+def meta(sideboard: bool = False, total_count: bool = False, top: int = 25):
+    """Get metagame data on card frequencies."""
+    if sideboard:
+        board = 'sideboard'
+    else:
+        board = 'mainboard'
+    if total_count:
+        rank = 'total_count'
+    else:
+        rank = 'unique_count'
+
+    # Load standings
+    standings_path = Path(data_files_path) / 'metagame' / 'standings.json'
+    with open(standings_path, 'r') as f:
+        standings_dict = json.load(f)
+        decks = standings_dict['data']
+
+    # Ranks cards
+    card_rank = metagame.get_card_counts(decks, board=board, rank=rank)
+
+    # Print results
+    print(f"{standings_dict['format'].upper()} METAGAME")
+    print(f"- {standings_dict['start_date']} - {standings_dict['end_date']}")
+    print(f"- {board} only, {rank.replace('_', ' ')}")
+    i = 1
+    for card, freq in card_rank.items():
+        if i == top + 1:
+            break
+        print(f"{(str(i) + ')').ljust(4)} {str(freq[rank]).ljust(5)} {card}")
+        i += 1
+    print()
 
 
 def cli():
