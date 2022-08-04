@@ -5,6 +5,7 @@ from pathlib import Path
 from mtg_toolbelt.utils import load_config, setup_dir
 from mtg_toolbelt.database import cards
 from mtg_toolbelt.metagame import mtgo_standings, metagame
+from mtg_toolbelt.simulation import mana
 
 
 config = load_config()
@@ -85,6 +86,22 @@ def meta(sideboard: bool = False, total_count: bool = False, top: int = 25):
         print(f"{(str(i) + ')').ljust(4)} {str(count['total_count']).ljust(5)} {str(count['unique_count']).ljust(6)} {freq:<7.1f} {card}")
         i += 1
     print()
+
+
+@app.command()
+def mana_sim(deck_size: int = 60, turns: int = 7, on_play: bool = False, mulligans: bool = True, iterations: int = 10000):
+    sim_path = Path(data_files_path) / 'simulations'
+    setup_dir(sim_path)
+
+    mana.mana_curve_table(
+        sim_path=sim_path,
+        n_lands_range=[16, 26],
+        deck_size=deck_size,
+        turns=turns,
+        on_play=on_play,
+        consider_mulligans=mulligans,
+        iterations=iterations
+    )
 
 
 def cli():
