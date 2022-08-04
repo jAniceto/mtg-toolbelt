@@ -2,15 +2,17 @@ from datetime import date, timedelta
 import json
 import typer
 from pathlib import Path
-from mtg_toolbelt.utils import load_config, setup_dir
 from mtg_toolbelt.database import cards
 from mtg_toolbelt.metagame import mtgo_standings, metagame
+from mtg_toolbelt.mtgo import exporter
 from mtg_toolbelt.simulation import mana
+from mtg_toolbelt.utils import load_config, setup_dir
 
 
 config = load_config()
 data_files_path = config['global']['data_files_path']
 scryfall_db_url = config['database']['oracle_cards_url']
+working_path = Path().absolute()
 
 app = typer.Typer()
 
@@ -18,10 +20,28 @@ app = typer.Typer()
 @app.command()
 def test():
     """Test command"""
-    import os
-    print('Working dir:', os.getcwd())
-    print('Data files path', os.getcwd() + '\\' + config['global']['data_files_path'])
+    print('Working dir:', working_path)
+    print('Data files path', working_path / config['global']['data_files_path'])
     print('Works!')
+
+
+@app.command()
+def export(format_: str = 'pauper'):
+    """Export MTGO decks and organize in folders."""
+    decks_path = Path(data_files_path) / 'mtgo-decks'
+    deck_path_absolute = working_path / decks_path
+    setup_dir(decks_path)
+
+    # Export decks
+    exporter.auto_export(str(deck_path_absolute) + '\\')
+    # exporter.auto_export(str(decks_path) + '\\')
+
+    # Organize decks
+    exporter.organize(
+        decks_path=decks_path,
+        strip_chars=config['mtgo-exporter']['strip_chars'],
+        banlist=config['mtg']['banlist'][format_]
+    )
 
 
 @app.command()

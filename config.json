@@ -5,12 +5,15 @@
     },
     "mtg": {
         "help": "Configurations options regarding MtG.",
-        "pauper_banlist": [
-            "Daze", "Gitaxian Probe", "Gush", "Arcum's Astrolabe", "Expedition Map", "Mystic Sanctuary", "Fall from Favor",
-            "Cloud of Faeries", "Cloudpost", "Cranial Plating", "Empty the Warrens", "Frantic Search", "Grapeshot", "High Tide",
-            "Hymn to Tourach", "Invigorate", "Peregrine Drake", "Sinkhole", "Temporal Fissure", "Treasure Cruise", "Chatterstorm",
-            "Sojourner's Companion", "Bonder's Ornament", "Disciple of the Vault", "Galvanic Relay", "Prophetic Prism"
-        ]
+        "banlist": {
+            "pauper": [
+                "Daze", "Gitaxian Probe", "Gush", "Arcum's Astrolabe", "Expedition Map", "Mystic Sanctuary",
+                "Fall from Favor", "Cloud of Faeries", "Cloudpost", "Cranial Plating", "Empty the Warrens",
+                "Frantic Search", "Grapeshot", "High Tide", "Hymn to Tourach", "Invigorate", "Peregrine Drake",
+                "Sinkhole", "Temporal Fissure", "Treasure Cruise", "Chatterstorm", "Sojourner's Companion",
+                "Bonder's Ornament", "Disciple of the Vault", "Galvanic Relay", "Prophetic Prism"
+            ]
+        }
     },
     "mtgo-exporter": {
         "help": "Configurations options for MTGO Exporter tool.",
