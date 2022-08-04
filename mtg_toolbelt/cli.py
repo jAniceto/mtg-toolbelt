@@ -4,7 +4,7 @@ import typer
 from pathlib import Path
 from mtg_toolbelt.database import cards
 from mtg_toolbelt.metagame import mtgo_standings, metagame
-from mtg_toolbelt.mtgo import exporter
+from mtg_toolbelt.mtgo import exporter, deck_data
 from mtg_toolbelt.simulation import mana
 from mtg_toolbelt.utils import load_config, setup_dir
 
@@ -13,6 +13,7 @@ config = load_config()
 data_files_path = config['global']['data_files_path']
 scryfall_db_url = config['database']['oracle_cards_url']
 working_path = Path().absolute()
+decks_path = Path(data_files_path) / 'mtgo-decks'
 
 app = typer.Typer()
 
@@ -28,7 +29,6 @@ def test():
 @app.command()
 def export(format_: str = 'pauper'):
     """Export MTGO decks and organize in folders."""
-    decks_path = Path(data_files_path) / 'mtgo-decks'
     deck_path_absolute = working_path / decks_path
     setup_dir(decks_path)
 
@@ -45,7 +45,13 @@ def export(format_: str = 'pauper'):
 
 
 @app.command()
-def db_update():
+def update_decks():
+    deck_data.create_json(decks_path=decks_path)
+    deck_data.parse_deck_files(decks_path=decks_path)
+
+
+@app.command()
+def update_db():
     """Create or update card database from Scryfall."""
     db_path = Path(data_files_path) / 'db'
     cards.update_db(scryfall_db_url, db_path)

@@ -126,10 +126,6 @@ def organize(decks_path: Path, strip_chars: List[str] = None, banlist: List[str]
         # Create Banned and Ready dirs if needed
         setup_dir(banned_dir_path)
         setup_dir(ready_dir_path)
-        # if not banned_dir_path.exists():
-        #     banned_dir_path.mkdir()
-        # if not ready_dir_path.exists():
-        #     ready_dir_path.mkdir()
 
         # Move deck files to appropriate folder
         for deck_file in deck_files:
