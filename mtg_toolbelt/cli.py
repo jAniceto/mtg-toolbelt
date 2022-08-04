@@ -73,15 +73,16 @@ def meta(sideboard: bool = False, total_count: bool = False, top: int = 25):
     card_rank = metagame.get_card_counts(decks, board=board, rank=rank)
 
     # Print results
-    print(f"{standings_dict['format'].upper()} METAGAME")
-    print(f"- {standings_dict['start_date']} - {standings_dict['end_date']}")
-    print(f"- {board} only, {rank.replace('_', ' ')}\n")
-    print('Rank', 'Count', 'Card')
+    print(f"{standings_dict['format'].upper()} METAGAME ({standings_dict['n_decks']} decks)")
+    print(f"- from {standings_dict['start_date']} to {standings_dict['end_date']}")
+    print(f"- {board} only, sorted by {rank.replace('_', ' ')}\n")
+    print('Rank', 'Total', 'Unique', 'Freq(%)', 'Card')
     i = 1
-    for card, freq in card_rank.items():
+    for card, count in card_rank.items():
         if i == top + 1:
             break
-        print(f"{(str(i) + ')').ljust(4)} {str(freq[rank]).ljust(5)} {card}")
+        freq = count['unique_count'] / len(decks) * 100
+        print(f"{(str(i) + ')').ljust(4)} {str(count['total_count']).ljust(5)} {str(count['unique_count']).ljust(6)} {freq:<7.1f} {card}")
         i += 1
     print()
 
