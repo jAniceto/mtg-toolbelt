@@ -16,6 +16,7 @@ def scrape_decklists(start_date_str, end_date_str, format_, metagame_path):
     # Convert start and end dates into Date objects, as well as assign interval for checking
     start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
     end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+    meta_delta = end_date - start_date
     delta = timedelta(days=1)
 
     # Create a request list with each possible instance leagues/challenges of the chosen format for each day
@@ -82,26 +83,32 @@ def scrape_decklists(start_date_str, end_date_str, format_, metagame_path):
                 )
                 decks.append(d)
 
-        # Save standings
-        standings_dict = {
-            'format': format_,
-            'start_date': start_date_str,
-            'end_date': end_date_str,
-        }
+    # Save standings
+    standings_dict = {
+        'format': format_,
+        'start_date': start_date_str,
+        'end_date': end_date_str,
+    }
 
-        deck_dict = []
-        for deck in decks:
-            deck_dict.append(deck.to_dict())
-        standings_dict['data'] = deck_dict
+    deck_dict = []
+    for deck in decks:
+        deck_dict.append(deck.to_dict())
+    standings_dict['decks'] = deck_dict
+    standings_dict['n_decks'] = len(deck_dict)
 
-        standings_path = metagame_path / 'standings.json'
-        with open(standings_path, 'w') as f:
-            json.dump(standings_dict, f)
+    standings_path = metagame_path / 'standings.json'
+    with open(standings_path, 'w') as f:
+        json.dump(standings_dict, f)
+
+    # Log
+    print(f"{format_.upper()} format standings.")
+    print(f"Found {len(deck_dict)} decks in the period {start_date_str} - {end_date_str} ({meta_delta.days} days).")
+    print(f"Standings JSON saved to {str(standings_path)}.")
 
     return decks
 
 
 if __name__ == '__main__':
-    standings_path = Path('../../data/metagame')
-    res = scrape_decklists('2022-07-25', '2022-08-03', 'pauper', standings_path)
+    standings_path_ = Path('../../data/metagame')
+    res = scrape_decklists('2022-07-25', '2022-08-03', 'pauper', standings_path_)
     print(res[1].print())

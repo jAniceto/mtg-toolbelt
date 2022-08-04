@@ -1,3 +1,4 @@
+from datetime import date, timedelta
 import json
 import typer
 from pathlib import Path
@@ -30,8 +31,14 @@ def db_update():
 
 
 @app.command()
-def standings(start_date: str, end_date: str, format_: str, show: bool = False):
+def standings(format_: str, start_date: str = None, end_date: str = None, show: bool = False):
     """Scrape decklists from MTGO standings provided by magic.wizards.com."""
+    if not end_date:
+        end_date = date.today().strftime("%Y-%m-%d")
+    if not start_date:
+        start = date.today() - timedelta(days=30)
+        start_date = start.strftime("%Y-%m-%d")
+
     metagame_path = Path(data_files_path) / 'metagame'
     setup_dir(metagame_path)
 
@@ -60,7 +67,7 @@ def meta(sideboard: bool = False, total_count: bool = False, top: int = 25):
     standings_path = Path(data_files_path) / 'metagame' / 'standings.json'
     with open(standings_path, 'r') as f:
         standings_dict = json.load(f)
-        decks = standings_dict['data']
+        decks = standings_dict['decks']
 
     # Ranks cards
     card_rank = metagame.get_card_counts(decks, board=board, rank=rank)
