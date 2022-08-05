@@ -2,6 +2,15 @@
  
 A collection of tools for Magic the Gathering.
 
+## Main features
+
+`mtg-toolbelt` is a package and `CLI` with several tools for Magic the Gathering. Here are its main features:
+- Automatically export decks from the Magic the Gathering Online (MTGO) client into `.txt` files. Optionally you can process this decks to JSON.
+- Scrape decklists from the results' page at magic.wizards.com. 
+- Analyse metagame (most used cards).
+- Calculate mana curve probabilities.
+
+
 ## Instalation
 
 Using `pipenv`:
@@ -19,12 +28,15 @@ $ mtg-tools --help
 Usage: mtg-tools [OPTIONS] COMMAND [ARGS]...
 
 Commands:
-  db-update  Create or update card database from Scryfall.
-  meta       Get metagame data on card frequencies.
-  standings  Scrape decklists from MTGO standings provided by...
+  export        Auto export decks from MTGO into .txt.
+  mana-sim      Run simulation to create a mana curve table (CSV).
+  meta          Analyze metagame card usage and frequency.
+  standings     Scrape decklists from MTGO standings provided by...
+  update-db     Create or update card database from Scryfall (JSON).
+  update-decks  Create deck data files (JSON).
 ```
 
-For each command:
+For each command, get usage instructions by running:
 
 ```
 $ mtg-tools meta --help
@@ -45,6 +57,7 @@ Options:
 
 
 ## Configuration
+
 Use the `config.json` file to set configuration variables.
 
 ```json
