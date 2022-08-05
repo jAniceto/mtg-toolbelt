@@ -19,16 +19,8 @@ app = typer.Typer()
 
 
 @app.command()
-def test():
-    """Test command"""
-    print('Working dir:', working_path)
-    print('Data files path', working_path / config['global']['data_files_path'])
-    print('Works!')
-
-
-@app.command()
 def export(format_: str = 'pauper'):
-    """Export MTGO decks and organize in folders."""
+    """Auto export decks from MTGO into .txt."""
     deck_path_absolute = working_path / decks_path
     setup_dir(decks_path)
 
@@ -46,13 +38,14 @@ def export(format_: str = 'pauper'):
 
 @app.command()
 def update_decks():
+    """Create deck data files (JSON)."""
     deck_data.create_json(decks_path=decks_path)
     deck_data.parse_deck_files(decks_path=decks_path)
 
 
 @app.command()
 def update_db():
-    """Create or update card database from Scryfall."""
+    """Create or update card database from Scryfall (JSON)."""
     db_path = Path(data_files_path) / 'db'
     cards.update_db(scryfall_db_url, db_path)
 
@@ -80,7 +73,7 @@ def standings(format_: str, start_date: str = None, end_date: str = None, show: 
 
 @app.command()
 def meta(sideboard: bool = False, total_count: bool = False, top: int = 25):
-    """Get metagame data on card frequencies."""
+    """Analyze metagame card usage and frequency."""
     if sideboard:
         board = 'sideboard'
     else:
@@ -116,6 +109,7 @@ def meta(sideboard: bool = False, total_count: bool = False, top: int = 25):
 
 @app.command()
 def mana_sim(deck_size: int = 60, turns: int = 7, on_play: bool = False, mulligans: bool = True, iterations: int = 10000):
+    """Run simulation to create a mana curve table (CSV)."""
     sim_path = Path(data_files_path) / 'simulations'
     setup_dir(sim_path)
 
