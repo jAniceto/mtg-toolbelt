@@ -43,16 +43,6 @@ def export(format_: str = 'pauper'):
 
 
 @app.command()
-def organize(format_: str = 'pauper'):
-    """Organize decks into folders."""
-    exporter.organize(
-        decks_path=decks_path,
-        strip_chars=config['mtgo-exporter']['strip_chars'],
-        banlist=config['mtg']['banlist'][format_]
-    )
-
-
-@app.command()
 def update_decks():
     """Create deck data files (JSON)."""
     deck_data.create_json(decks_path=decks_path)

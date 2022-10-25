@@ -7,21 +7,17 @@
         "help": "Configurations options regarding MtG.",
         "banlist": {
             "pauper": [
-                "Daze", "Gitaxian Probe", "Gush", "Arcum's Astrolabe", "Expedition Map", "Mystic Sanctuary",
+                "Daze", "Gitaxian Probe", "Gush", "Arcum's Astrolabe", "Mystic Sanctuary",
                 "Fall from Favor", "Cloud of Faeries", "Cloudpost", "Cranial Plating", "Empty the Warrens",
                 "Frantic Search", "Grapeshot", "High Tide", "Hymn to Tourach", "Invigorate", "Peregrine Drake",
                 "Sinkhole", "Temporal Fissure", "Treasure Cruise", "Chatterstorm", "Sojourner's Companion",
-                "Bonder's Ornament", "Disciple of the Vault", "Galvanic Relay", "Prophetic Prism"
+                "Bonder's Ornament", "Disciple of the Vault", "Galvanic Relay", "Prophetic Prism", "Aarakocra Sneak",
+                "Vicious Battlerager", "Underdark Explorer", "Stirring Bard"
             ]
         }
     },
     "mtgo-exporter": {
         "help": "Configurations options for MTGO Exporter tool.",
         "strip_chars": ["#T1 ", "#T2 ", ".txt"]
-    },
-    "database" : {
-        "help": "Configurations options for card database.",
-        "oracle_cards_url": "https://c2.scryfall.com/file/scryfall-bulk/oracle-cards/oracle-cards-20220714090218.json"
-
     }
 }
