@@ -11,11 +11,17 @@ from mtg_toolbelt.utils import load_config, setup_dir
 
 config = load_config()
 data_files_path = config['global']['data_files_path']
-scryfall_db_url = config['database']['oracle_cards_url']
 working_path = Path().absolute()
 decks_path = Path(data_files_path) / 'mtgo-decks'
 
 app = typer.Typer()
+
+
+@app.command()
+def update_db():
+    """Create or update card database from Scryfall (JSON)."""
+    db_path = Path(data_files_path) / 'db'
+    cards.update_db(db_path)
 
 
 @app.command()
@@ -37,17 +43,20 @@ def export(format_: str = 'pauper'):
 
 
 @app.command()
+def organize(format_: str = 'pauper'):
+    """Organize decks into folders."""
+    exporter.organize(
+        decks_path=decks_path,
+        strip_chars=config['mtgo-exporter']['strip_chars'],
+        banlist=config['mtg']['banlist'][format_]
+    )
+
+
+@app.command()
 def update_decks():
     """Create deck data files (JSON)."""
     deck_data.create_json(decks_path=decks_path)
     deck_data.parse_deck_files(decks_path=decks_path)
-
-
-@app.command()
-def update_db():
-    """Create or update card database from Scryfall (JSON)."""
-    db_path = Path(data_files_path) / 'db'
-    cards.update_db(scryfall_db_url, db_path)
 
 
 @app.command()
