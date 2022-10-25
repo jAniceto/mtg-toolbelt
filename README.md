@@ -86,3 +86,11 @@ Use the `config.json` file to set configuration variables.
     }
 }
 ```
+
+## Typical Workflow
+
+```
+$ mtg-tools update-db
+$ mtg-tools export
+$ mtg-tools update-decks
+```
