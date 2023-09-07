@@ -19,7 +19,6 @@ class Deck:
         self.created_at = date.today().strftime("%Y/%m/%d")
 
     def to_dict(self):
-        # return asdict(self)
         return self.__dict__
 
     def to_txt(self, location):
