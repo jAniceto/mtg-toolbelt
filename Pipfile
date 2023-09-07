@@ -10,9 +10,10 @@ tqdm = "*"
 pathlib = "*"
 typer = "*"
 beautifulsoup4 = "*"
+mtg-toolbelt = {editable = true, path = "."}
 
 [dev-packages]
 mtg-toolbelt = {editable = true, path = "."}
 
 [requires]
-python_version = "3.9"
+python_version = "3"
