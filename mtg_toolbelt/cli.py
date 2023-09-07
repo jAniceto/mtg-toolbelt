@@ -26,13 +26,12 @@ def update_db():
 
 @app.command()
 def export(format_: str = 'pauper'):
-    """Auto export decks from MTGO into .txt."""
+    """Auto export decks from MTGO into .txt. Separates sinto a valid and invalid folders."""
     deck_path_absolute = working_path / decks_path
     setup_dir(decks_path)
 
     # Export decks
     exporter.auto_export(str(deck_path_absolute) + '\\')
-    # exporter.auto_export(str(decks_path) + '\\')
 
     # Organize decks
     exporter.organize(
