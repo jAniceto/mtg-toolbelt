@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from pathlib import Path
 import requests
 from tqdm import tqdm
-from mtg_toolbelt.models import Deck
+from mtg_toolbelt.decks import Deck
 
 
 def scrape_decklists(start_date_str, end_date_str, format_, metagame_path):
