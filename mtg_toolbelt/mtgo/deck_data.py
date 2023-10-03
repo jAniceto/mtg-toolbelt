@@ -15,7 +15,7 @@ CARD_INFO_DICT = {}
 
 def search_deck(name, deck_list):
     """
-    Given a deck name, return the deck info dictionary if it exist in a given list of deck dictionaries.
+    Given a deck name, return the deck info dictionary if it exists in a given list of deck dictionaries.
     """
     for d in deck_list:
         if d['name'] == name:

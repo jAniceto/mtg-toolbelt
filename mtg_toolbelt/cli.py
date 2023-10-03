@@ -43,7 +43,7 @@ def export(format_: str = 'pauper'):
 
 @app.command()
 def organize(format_: str = 'pauper'):
-    """Organize exported decks. Usefull if deck files are already available."""
+    """Organize exported decks. Useful if deck files are already available."""
     exporter.organize(
         decks_path=decks_path,
         strip_chars=config['mtgo-exporter']['strip_chars'],

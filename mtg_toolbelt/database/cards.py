@@ -20,7 +20,12 @@ def scryfall_db_download(file_path: Path):
 
 
 def update_db(db_dir: Path):
-    """Create or update database."""
+    """Create or update database.
+
+    Creates two JSON files:
+    1) oracle-cards.json is a list of Scryfall card objects.
+    2) card-db.json is a dictionary with the card name as key and Scryfall card objects as values.
+    """
     setup_dir(db_dir)
 
     # Download Scryfall data
