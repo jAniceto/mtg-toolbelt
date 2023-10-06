@@ -2,9 +2,10 @@ import sys
 import json
 import logging
 import sys
-import time
 from pathlib import Path
 from typing import List, Dict
+
+from tqdm import tqdm
 
 from mtg_toolbelt.decks import Deck
 from mtg_toolbelt.utils import FAMILIES
@@ -13,8 +14,7 @@ from mtg_toolbelt.utils import FAMILIES
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     handlers=[
-        logging.StreamHandler(sys.stdout),  # print log to terminal
-        # logging.FileHandler("log_file_name.log", mode="w"),  # log to file
+        logging.StreamHandler(sys.stdout),  # log to terminal
     ],
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -44,9 +44,26 @@ def count_missing_properties(decks_list: List[Deck], prop: str) -> int:
 
 def create_deck_json(decks_dir_path: Path = Path('data/mtgo-decks')):
     """Create or update a deck info dict.
-    This is a JSON file with a list of dictionaries containing basic deck info to be edited by the user
+    This is a JSON file with a list of dictionaries containing basic deck info to be edited by the user.
+    Example:
+        {
+            "name": "Acid Trip Azorius",
+            "color": "azorius",
+            "tags": [],
+            "author": null,
+            "source": null,
+            "created_at": "2023/10/03"
+        },
+        {
+            "name": "Acid Trip Gate",
+            "color": null,
+            "tags": [],
+            "author": null,
+            "source": null,
+            "created_at": "2023/10/03"
+        }
     """
-    # Get old deck info is it exists
+    # Get old deck info if it exists
     old_decks_json = decks_dir_path / 'decks.json'
     if old_decks_json.exists():
         logger.info('Found deck.json. Updating data...')
@@ -126,12 +143,14 @@ def create_deck_json(decks_dir_path: Path = Path('data/mtgo-decks')):
         pass
     new_decks_json.rename(decks_dir_path / 'decks.json')
 
-    logger.info("Done")
+    logger.info("Done.")
 
 
-def parse_deck_files(decks_dir_path: Path = Path('data/mtgo-decks')):
+def parse_deck_files(
+        decks_dir_path: Path = Path('data/mtgo-decks'),
+        card_db_path: Path = Path('data/db/card-db.json')
+):
     """Parses deck files (.txt) for all decks in decks.json."""
-    start_time = time.time()
     logger.info('Loading decks from JSON file...')
 
     # Get current list of decks (decks.json)
@@ -149,18 +168,40 @@ def parse_deck_files(decks_dir_path: Path = Path('data/mtgo-decks')):
     decks = [Deck(**d) for d in all_decks]
 
     # Parse decklists and update deck objects
-    for deck in decks:
+    if __name__ == '__main__':
+        card_db_path = Path('../../data/db/card-db.json')
+
+    progress_bar = tqdm(decks)
+    for i, deck in enumerate(progress_bar):
         deck_txt_file = decks_dir_path / f"valid/{deck.name}.txt"
         deck.get_board_from_txt(deck_txt_file)
+        deck.get_price(unit='tix', card_db_path=card_db_path)
+        progress_bar.set_description(f"Completed {deck.name}")
 
-    pass
+    logger.info('Done.')
+    return decks
+
+
+def create_full_deck_json(decks: List[Deck], decks_dir_path: Path = Path('data/mtgo-decks')):
+    """Create a complete deck info JSON file containing deck info, decklist, and deck prices."""
+    logger.info('Creating a full deck JSON...')
+    # Get list of deck dict
+    deck_list = [deck.to_dict() for deck in decks]
+
+    # Save deck data to JSON
+    full_decks_path = decks_dir_path / 'decks_full.json'
+    with open(full_decks_path, 'w') as decks_json:
+        json.dump(deck_list, decks_json, sort_keys=True, indent=2)
+
+    logger.info('Done.')
 
 
 if __name__ == '__main__':
     # Create or update a deck.json file
     create_deck_json(decks_dir_path=Path('../../data/mtgo-decks'))
 
+    # Create a list of deck objects with all info
+    decks = parse_deck_files(decks_dir_path=Path('../../data/mtgo-decks'))
+
     # Create a complete (including decklist) deck_full.json file
-    parse_deck_files(decks_dir_path=Path('../../data/mtgo-decks'))
-
-
+    create_full_deck_json(decks, decks_dir_path=Path('../../data/mtgo-decks'))
