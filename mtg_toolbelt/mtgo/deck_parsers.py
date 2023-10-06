@@ -3,7 +3,7 @@ import json
 import logging
 import sys
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from tqdm import tqdm
 
@@ -90,26 +90,11 @@ def create_deck_json(decks_dir_path: Path = Path('data/mtgo-decks')):
 
             if prev_deck_info:
                 # Update deck object with previous info
-                try:
-                    deck.tags = prev_deck_info['tags']
-                except KeyError:
-                    pass
-                try:
-                    deck.color = prev_deck_info['family']  # compatibility with older versions
-                except KeyError:
-                    deck.color = prev_deck_info['color']
-                try:
-                    deck.author = prev_deck_info['author']
-                except (KeyError, TypeError):
-                    deck.author = prev_deck_info['source']['name']  # compatibility with older versions
-                try:
-                    deck.source = prev_deck_info['source']['link']  # compatibility with older versions
-                except (KeyError, TypeError):
-                    deck.source = prev_deck_info['source']
-                try:
-                    deck.created_at = prev_deck_info['created_at']
-                except KeyError:
-                    pass
+                deck.color = prev_deck_info['color']
+                deck.tags = prev_deck_info['tags']
+                deck.author = prev_deck_info['author']
+                deck.source = prev_deck_info['source']
+                deck.created_at = prev_deck_info['created_at']
             else:
                 deck.color = find_family(deck_name)
 
@@ -143,42 +128,40 @@ def create_deck_json(decks_dir_path: Path = Path('data/mtgo-decks')):
         pass
     new_decks_json.rename(decks_dir_path / 'decks.json')
 
-    logger.info("Done.")
+    logger.info("Done.\n")
+
+    return decks
 
 
-def parse_deck_files(
-        decks_dir_path: Path = Path('data/mtgo-decks'),
-        card_db_path: Path = Path('data/db/card-db.json')
-):
+def parse_deck_files(decks: Optional[List[Deck]] = None, decks_dir_path: Path = Path('data/mtgo-decks')):
     """Parses deck files (.txt) for all decks in decks.json."""
-    logger.info('Loading decks from JSON file...')
+    if not decks:
+        logger.info('Loading decks from JSON file...')
 
-    # Get current list of decks (decks.json)
-    decks_file = decks_dir_path / 'decks.json'
-    with open(decks_file, 'r') as f:
-        deck_list = json.load(f)
+        # Get current list of decks (decks.json)
+        decks_file = decks_dir_path / 'decks.json'
+        with open(decks_file, 'r') as f:
+            deck_list = json.load(f)
 
-    total_decks = len(deck_list)
-    logger.info(f'Processing {total_decks} decks.')
+        total_decks = len(deck_list)
+        logger.info(f'Processing {total_decks} decks.')
 
-    # Sort list of decks by deck name
-    all_decks = sorted(deck_list, key=lambda k: k['name'])
+        # Sort list of decks by deck name
+        all_decks = sorted(deck_list, key=lambda k: k['name'])
 
-    # Create deck objects
-    decks = [Deck(**d) for d in all_decks]
+        # Create deck objects
+        decks = [Deck(**d) for d in all_decks]
 
     # Parse decklists and update deck objects
-    if __name__ == '__main__':
-        card_db_path = Path('../../data/db/card-db.json')
-
+    logger.info('Parsing decklists...')
     progress_bar = tqdm(decks)
     for i, deck in enumerate(progress_bar):
         deck_txt_file = decks_dir_path / f"valid/{deck.name}.txt"
-        deck.get_board_from_txt(deck_txt_file)
-        deck.get_price(unit='tix', card_db_path=card_db_path)
+        deck.get_decklist_from_txt(deck_txt_file)
+        deck.get_price(currency='tix')
         progress_bar.set_description(f"Completed {deck.name}")
 
-    logger.info('Done.')
+    logger.info('Done.\n')
     return decks
 
 
@@ -193,15 +176,16 @@ def create_full_deck_json(decks: List[Deck], decks_dir_path: Path = Path('data/m
     with open(full_decks_path, 'w') as decks_json:
         json.dump(deck_list, decks_json, sort_keys=True, indent=2)
 
-    logger.info('Done.')
+    logger.info('Done.\n')
 
 
 if __name__ == '__main__':
     # Create or update a deck.json file
-    create_deck_json(decks_dir_path=Path('../../data/mtgo-decks'))
+    decks = create_deck_json(decks_dir_path=Path('../../data/mtgo-decks'))
 
     # Create a list of deck objects with all info
-    decks = parse_deck_files(decks_dir_path=Path('../../data/mtgo-decks'))
+    # decks = parse_deck_files(decks_dir_path=Path('../../data/mtgo-decks'))
+    decks = parse_deck_files(decks=decks[:20], decks_dir_path=Path('../../data/mtgo-decks'))
 
     # Create a complete (including decklist) deck_full.json file
     create_full_deck_json(decks, decks_dir_path=Path('../../data/mtgo-decks'))

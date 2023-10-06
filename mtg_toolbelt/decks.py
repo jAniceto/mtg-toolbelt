@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 from typing import List, Tuple, Optional
-from mtg_toolbelt.prices import get_card_price
+from mtg_toolbelt.scryfall import get_best_price
 
 
 @dataclass
@@ -16,14 +16,21 @@ class Deck:
     author: Optional[str] = None
     source: Optional[str] = None
     created_at: Optional[str] = None
+    mainboard_price: Optional[float] = None
+    sideboard_price: Optional[float] = None
+    price: Optional[float] = None
 
     def __post_init__(self):
-        self.created_at = date.today().strftime("%Y/%m/%d")
+        """If creating a new deck object, add a creation date."""
+        if not self.created_at:
+            self.created_at = date.today().strftime("%Y/%m/%d")
 
     def to_dict(self):
+        """Deck object to dictionary."""
         return self.__dict__
 
     def to_dict_for_edit(self):
+        """Deck object to a simple dictionary for editing deck info."""
         return {
             "name": self.name,
             "color": self.color,
@@ -33,7 +40,16 @@ class Deck:
             "created_at": self.created_at,
         }
 
-    def get_board_from_txt(self, txt_file: Path):
+    def get_decklist_from_txt(self, txt_file: Path):
+        """Load decklist from a txt of the following type. Sideboard after a black line.
+        Example .txt:
+            10 Forest
+            4 Rancor
+            ...
+            1 Young Wolf
+
+            4 Relic of Progenitus
+        """
         is_mainboard = True
         self.mainboard = []
         self.sideboard = []
@@ -49,7 +65,6 @@ class Deck:
                         self.sideboard.append((int(card_line[0]), card_line[1]))
 
     def to_txt(self, location):
-        # filename = f"{location}/Deck-{self.name.replace(' ', '-')}.txt"
         filename = Path(location) / f"Deck-{self.name.replace(' ', '-')}.txt"
         with open(filename, 'w') as f:
             # Write mainboard
@@ -80,32 +95,20 @@ class Deck:
         if self.created_at:
             print(f"Created: {self.created_at}")
 
-    def mainboard_size(self):
-        n = 0
-        for c in self.mainboard:
-            n += c[0]
-        return n
-
-    def sideboard_size(self):
-        n = 0
-        for c in self.sideboard:
-            n += c[0]
-        return n
-
-    def get_price(self, unit: str = 'tix', card_db_path: Path = Path('data/db/card-db.json')):
+    def get_price(self, currency: str = 'tix'):
         # Calculate prices
-        mainboard_price = 0
+        self.mainboard_price = 0
         for card in self.mainboard:
-            price = get_card_price(card[1], unit=unit, card_db_path=card_db_path)
-            mainboard_price += card[0] * price
+            price = get_best_price(card[1], currency=currency)
+            self.mainboard_price += card[0] * price
 
-        sideboard_price = 0
+        self.sideboard_price = 0
         for card in self.sideboard:
-            price = get_card_price(card[1], unit=unit, card_db_path=card_db_path)
-            sideboard_price += card[0] * price
+            price = get_best_price(card[1], currency=currency)
+            self.sideboard_price += card[0] * price
 
-        decklist_price = mainboard_price + sideboard_price
-        return decklist_price, mainboard_price, sideboard_price
+        self.price = self.mainboard_price + self.sideboard_price
+        return self.price, self.mainboard_price, self.sideboard_price
 
 
 def mainboard_by_types(deck: Deck, card_db_path: Path = Path('data/db/card-db.json')):
@@ -176,7 +179,7 @@ if __name__ == '__main__':
             (4, 'Vault Skirge'),
             (4, 'Quirion Ranger'),
             (10, 'Forest'),
-            (4, 'Ancient Den'),
+            (4, 'Basilisk Gate'),
             (1, 'Relic of Progenitus'),
         ],
         sideboard=[
@@ -193,9 +196,6 @@ if __name__ == '__main__':
     print(deck1.to_dict())
     print()
 
-    print(f"Mainboard has {deck1.mainboard_size()} cards")
-    print()
-
     # print(deck1.to_txt('.'))
     deck1.print()
     print()
@@ -207,6 +207,6 @@ if __name__ == '__main__':
 
     # Test calculating deck price
     print('Calculate deck price')
-    total_price, price_main, price_side = deck1.get_price('tix', card_db_path=Path('../data/db/card-db.json'))
+    total_price, price_main, price_side = deck1.get_price(currency='tix')
     print(f"Mainboard: {price_main:.2f} | Sideboard: {price_side:.2f} | Total: {total_price:.2f} tix")
     print()
