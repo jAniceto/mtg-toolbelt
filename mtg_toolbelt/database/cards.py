@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from functools import lru_cache
 import requests
 from mtg_toolbelt.utils import setup_dir
 
@@ -49,6 +50,13 @@ def update_db(db_dir: Path):
     # Log
     print('JSON database created at:', card_json_file_path)
     print('Number of cards:', len(cards_dict))
+
+
+@lru_cache
+def load_card_db(path=Path('data/db/card-db.json')):
+    with open(path, 'r', encoding='utf-8') as f:
+        card_db = json.load(f)
+    return card_db
 
 
 if __name__ == '__main__':
