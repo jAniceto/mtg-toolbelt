@@ -1,8 +1,9 @@
 import json
-from pathlib import Path
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from datetime import date
+from pathlib import Path
 from typing import List, Tuple, Optional
+from mtg_toolbelt.prices import get_card_price
 
 
 @dataclass
@@ -15,8 +16,6 @@ class Deck:
     author: Optional[str] = None
     source: Optional[str] = None
     created_at: Optional[str] = None
-    price: Optional[Tuple[float, float, float]] = None
-    price_currency: Optional[str] = None
 
     def __post_init__(self):
         self.created_at = date.today().strftime("%Y/%m/%d")
@@ -38,16 +37,16 @@ class Deck:
         is_mainboard = True
         self.mainboard = []
         self.sideboard = []
-        with open(txt_file, 'r') as f:
+        with open(txt_file, 'r', encoding="utf-8") as f:
             for line in f:
                 if line in ['\n', '\r\n']:
                     is_mainboard = False
                 else:
                     card_line = line.strip('\n').split(' ', 1)
                     if is_mainboard:
-                        self.mainboard.append((card_line[0], card_line[1]))
+                        self.mainboard.append((int(card_line[0]), card_line[1]))
                     else:
-                        self.sideboard.append((card_line[0], card_line[1]))
+                        self.sideboard.append((int(card_line[0]), card_line[1]))
 
     def to_txt(self, location):
         # filename = f"{location}/Deck-{self.name.replace(' ', '-')}.txt"
@@ -93,43 +92,20 @@ class Deck:
             n += c[0]
         return n
 
-    def get_price(self, currency: str = 'tix', card_db_path: Path = Path('data/db/card-db.json')):
-        # Validate price currency
-        valid_currencies = ['tix', 'usd', 'eur']
-        if currency not in valid_currencies:
-            print(f"Invalid currency. Select one of {', '.join(valid_currencies)}")
-            return
-
-        # Load card database if available
-        if card_db_path.exists():
-            with open(card_db_path, 'r') as f:
-                card_db = json.load(f)
-        else:
-            print('Card DB not found.')
-            return
-
+    def get_price(self, unit: str = 'tix', card_db_path: Path = Path('data/db/card-db.json')):
         # Calculate prices
         mainboard_price = 0
         for card in self.mainboard:
-            try:
-                price = float(card_db[card[1]]['prices'][currency])
-            except TypeError:
-                price = 0
-            mainboard_price += (card[0] * price)
+            price = get_card_price(card[1], unit=unit, card_db_path=card_db_path)
+            mainboard_price += card[0] * price
 
         sideboard_price = 0
         for card in self.sideboard:
-            try:
-                price = float(card_db[card[1]]['prices'][currency])
-            except TypeError:
-                price = 0
-            sideboard_price += (card[0] * price)
+            price = get_card_price(card[1], unit=unit, card_db_path=card_db_path)
+            sideboard_price += card[0] * price
 
         decklist_price = mainboard_price + sideboard_price
-
-        self.price = (decklist_price, mainboard_price, sideboard_price)
-        self.price_currency = currency
-        return self.price
+        return decklist_price, mainboard_price, sideboard_price
 
 
 def mainboard_by_types(deck: Deck, card_db_path: Path = Path('data/db/card-db.json')):
