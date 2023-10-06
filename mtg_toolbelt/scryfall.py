@@ -1,6 +1,8 @@
+from functools import lru_cache
 import requests
 
 
+@lru_cache(maxsize=None)
 def get_card(name: str, currency: str = 'tix'):
     """Get a Scryfall card object for a given card name.
     Calculates the best price in the chosen currency.
@@ -51,15 +53,26 @@ def get_card(name: str, currency: str = 'tix'):
     return card_info
 
 
+@lru_cache
+def get_best_price(name: str, currency: str = 'tix'):
+    """Return the best price of a card for a given currency from Scryfall."""
+    card = get_card(name, currency=currency)
+    try:
+        return float(card['best_price'][1])
+    except TypeError:
+        return 0
+
+
 if __name__ == '__main__':
     # Example cards
     CARDS = [
         'Brainstorm',
         'Delver of Secrets',
         'Ancient Den',
+        'Basilisk Gate',
     ]
     CURRENCY = 'tix'
 
-    for card in CARDS:
-        c = get_card(card, currency=CURRENCY)
-        print(f"{c['name']}: {c['best_price'][1]} {CURRENCY}")
+    for card_name in CARDS:
+        price = get_best_price(card_name, currency=CURRENCY)
+        print(f"{card_name}: {price} {CURRENCY}")
